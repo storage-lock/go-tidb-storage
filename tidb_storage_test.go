@@ -13,7 +13,7 @@ func TestNewTidbStorage(t *testing.T) {
 	envName := "STORAGE_LOCK_TIDB_DSN"
 	dsn := os.Getenv(envName)
 	assert.NotEmpty(t, dsn)
-	connectionGetter := NewTidbConnectionProviderFromDSN(dsn)
+	connectionGetter := NewTidbConnectionManagerFromDSN(dsn)
 	storage, err := NewTidbStorage(context.Background(), &TidbStorageOptions{
 		MySQLStorageOptions: &mysql_storage.MySQLStorageOptions{
 			ConnectionManager: connectionGetter,

@@ -52,7 +52,7 @@ func (x *TidbStorage) UpdateWithVersion(ctx context.Context, lockId string, exce
 }
 
 func (x *TidbStorage) InsertWithVersion(ctx context.Context, lockId string, version storage.Version, lockInformation *storage.LockInformation) error {
-	return x.MySQLStorage.InsertWithVersion(ctx, lockId, version, lockInformation)
+	return x.MySQLStorage.CreateWithVersion(ctx, lockId, version, lockInformation)
 }
 
 func (x *TidbStorage) DeleteWithVersion(ctx context.Context, lockId string, exceptedVersion storage.Version, lockInformation *storage.LockInformation) error {
