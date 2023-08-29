@@ -2,10 +2,11 @@ package tidb_storage
 
 import (
 	"context"
+	"time"
+
 	"github.com/golang-infrastructure/go-iterator"
 	mysql_storage "github.com/storage-lock/go-mysql-storage"
 	"github.com/storage-lock/go-storage"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -18,6 +19,12 @@ type TidbStorage struct {
 
 	// 创建storage的选项
 	options *TidbStorageOptions
+}
+
+const StorageName = "tidb-storage"
+
+func (x *TidbStorage) GetName() string {
+	return StorageName
 }
 
 var _ storage.Storage = &TidbStorage{}
