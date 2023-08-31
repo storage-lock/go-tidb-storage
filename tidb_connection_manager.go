@@ -3,33 +3,53 @@ package tidb_storage
 import (
 	"context"
 	"database/sql"
-	mysql_storage "github.com/storage-lock/go-mysql-storage"
+	"fmt"
 	"github.com/storage-lock/go-storage"
 	"sync"
 )
 
-// TidbConnectionManager 创建一个TIDB的连接
+// TidbConnectionManager 创建一个MySQL的连接管理器
 type TidbConnectionManager struct {
-	// tidb底层实际上都是跟mysql通用的
-	once *sync.Once
-	*mysql_storage.MySQLConnectionManager
+
+	// 主机的名字
+	Host string
+
+	// 主机的端口
+	Port uint
+
+	// 用户名
+	User string
+
+	// 密码
+	Passwd string
+
+	DatabaseName string
+
+	DSN string
+
+	// 初始化好的数据库实例
+	db   *sql.DB
+	err  error
+	once sync.Once
 }
 
 var _ storage.ConnectionManager[*sql.DB] = &TidbConnectionManager{}
 
-// NewTidbConnectionManagerFromDSN 从DSN创建TiDB连接管理器
+// NewTidbConnectionManagerFromDSN 从DSN创建MySQL连接管理器
 func NewTidbConnectionManagerFromDSN(dsn string) *TidbConnectionManager {
 	return &TidbConnectionManager{
-		once:                   &sync.Once{},
-		MySQLConnectionManager: mysql_storage.NewMySQLConnectionManagerFromDSN(dsn),
+		DSN: dsn,
 	}
 }
 
 // NewTidbConnectionManager 从连接属性创建数据库连接
 func NewTidbConnectionManager(host string, port uint, user, passwd, database string) *TidbConnectionManager {
 	return &TidbConnectionManager{
-		once:                   &sync.Once{},
-		MySQLConnectionManager: mysql_storage.NewMySQLConnectionManager(host, port, user, passwd, database),
+		Host:         host,
+		Port:         port,
+		User:         user,
+		Passwd:       passwd,
+		DatabaseName: database,
 	}
 }
 
@@ -58,25 +78,39 @@ func (x *TidbConnectionManager) SetDatabaseName(databaseName string) *TidbConnec
 	return x
 }
 
-const TiDBConnectionManagerName = "tidb-connection-manager"
+const TidbConnectionManagerName = "mysql-connection-manager"
 
 func (x *TidbConnectionManager) Name() string {
-	return TiDBConnectionManagerName
+	return TidbConnectionManagerName
 }
 
 // Take 获取到数据库的连接
 func (x *TidbConnectionManager) Take(ctx context.Context) (*sql.DB, error) {
-	return x.MySQLConnectionManager.Take(ctx)
+	x.once.Do(func() {
+		db, err := sql.Open("mysql", x.GetDSN())
+		if err != nil {
+			x.err = err
+			return
+		}
+		x.db = db
+	})
+	return x.db, x.err
 }
 
 func (x *TidbConnectionManager) GetDSN() string {
-	return x.MySQLConnectionManager.GetDSN()
+	if x.DSN != "" {
+		return x.DSN
+	}
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", x.User, x.Passwd, x.Host, x.Port, x.DatabaseName)
 }
 
 func (x *TidbConnectionManager) Return(ctx context.Context, db *sql.DB) error {
-	return x.MySQLConnectionManager.Return(ctx, db)
+	return nil
 }
 
 func (x *TidbConnectionManager) Shutdown(ctx context.Context) error {
-	return x.MySQLConnectionManager.Shutdown(ctx)
+	if x.db != nil {
+		return x.db.Close()
+	}
+	return nil
 }

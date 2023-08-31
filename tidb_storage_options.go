@@ -2,16 +2,24 @@ package tidb_storage
 
 import (
 	"database/sql"
-	mysql_storage "github.com/storage-lock/go-mysql-storage"
+
 	"github.com/storage-lock/go-storage"
 )
 
+// TidbStorageOptions 基于MySQL为存储引擎时的选项
 type TidbStorageOptions struct {
-	*mysql_storage.MySQLStorageOptions
+
+	// 存放锁的表的名字，如果未指定的话则使用默认的表
+	TableName string
+
+	// 用于获取数据库连接
+	ConnectionManager storage.ConnectionManager[*sql.DB]
 }
 
 func NewTidbStorageOptions() *TidbStorageOptions {
-	return &TidbStorageOptions{mysql_storage.NewMySQLStorageOptions()}
+	return &TidbStorageOptions{
+		TableName: storage.DefaultStorageTableName,
+	}
 }
 
 func (x *TidbStorageOptions) SetConnectionManager(connManager storage.ConnectionManager[*sql.DB]) *TidbStorageOptions {
