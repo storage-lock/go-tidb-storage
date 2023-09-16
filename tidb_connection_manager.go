@@ -35,10 +35,16 @@ type TidbConnectionManager struct {
 
 var _ storage.ConnectionManager[*sql.DB] = &TidbConnectionManager{}
 
-// NewTidbConnectionManagerFromDSN 从DSN创建MySQL连接管理器
-func NewTidbConnectionManagerFromDSN(dsn string) *TidbConnectionManager {
+// NewTidbConnectionManagerFromDsn 从DSN创建MySQL连接管理器
+func NewTidbConnectionManagerFromDsn(dsn string) *TidbConnectionManager {
 	return &TidbConnectionManager{
 		DSN: dsn,
+	}
+}
+
+func NewTidbConnectionManagerFromSqlDb(db *sql.DB) *TidbConnectionManager {
+	return &TidbConnectionManager{
+		db: db,
 	}
 }
 
@@ -87,6 +93,9 @@ func (x *TidbConnectionManager) Name() string {
 // Take 获取到数据库的连接
 func (x *TidbConnectionManager) Take(ctx context.Context) (*sql.DB, error) {
 	x.once.Do(func() {
+		if x.db != nil {
+			return
+		}
 		db, err := sql.Open("mysql", x.GetDSN())
 		if err != nil {
 			x.err = err

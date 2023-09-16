@@ -2,6 +2,8 @@ package tidb_storage
 
 import (
 	"database/sql"
+	"fmt"
+	mysql_storage "github.com/storage-lock/go-mysql-storage"
 
 	"github.com/storage-lock/go-storage"
 )
@@ -30,4 +32,21 @@ func (x *TidbStorageOptions) SetConnectionManager(connManager storage.Connection
 func (x *TidbStorageOptions) SetTableName(tableName string) *TidbStorageOptions {
 	x.TableName = tableName
 	return x
+}
+
+func (x *TidbStorageOptions) toMysqlStorageOptions() *mysql_storage.MysqlStorageOptions {
+	return mysql_storage.NewMySQLStorageOptions().SetConnectionManager(x.ConnectionManager).SetTableName(x.TableName)
+}
+
+func (x *TidbStorageOptions) Check() error {
+
+	if x.TableName == "" {
+		x.TableName = storage.DefaultStorageTableName
+	}
+
+	if x.ConnectionManager == nil {
+		return fmt.Errorf("ConnectionManager can not nil")
+	}
+
+	return nil
 }
