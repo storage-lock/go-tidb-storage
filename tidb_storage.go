@@ -38,6 +38,12 @@ func (x *TidbStorage) GetName() string {
 	return StorageName
 }
 
+// Capabilities 声明 TiDB 存储支持的能力
+// TiDB 兼容 MySQL 协议，同样支持 CAS 和可靠时间源
+func (x *TidbStorage) Capabilities() []storage.StorageCapability {
+	return x.MysqlStorage.Capabilities()
+}
+
 //func (x *TidbStorage) Init(ctx context.Context) (returnError error) {
 //	db, err := x.options.ConnectionManager.Take(ctx)
 //	if err != nil {

@@ -35,7 +35,7 @@ func (x *TidbStorageOptions) SetTableName(tableName string) *TidbStorageOptions 
 }
 
 func (x *TidbStorageOptions) toMysqlStorageOptions() *mysql_storage.MysqlStorageOptions {
-	return mysql_storage.NewMySQLStorageOptions().SetConnectionManager(x.ConnectionManager).SetTableName(x.TableName)
+	return mysql_storage.NewMysqlStorageOptions().SetConnectionManager(x.ConnectionManager).SetTableName(x.TableName)
 }
 
 func (x *TidbStorageOptions) Check() error {
