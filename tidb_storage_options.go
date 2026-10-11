@@ -3,12 +3,13 @@ package tidb_storage
 import (
 	"database/sql"
 	"fmt"
+
 	mysql_storage "github.com/storage-lock/go-mysql-storage"
 
 	"github.com/storage-lock/go-storage"
 )
 
-// TidbStorageOptions 基于MySQL为存储引擎时的选项
+// TidbStorageOptions 基于TiDB为存储引擎时的选项
 type TidbStorageOptions struct {
 
 	// 存放锁的表的名字，如果未指定的话则使用默认的表
@@ -34,19 +35,19 @@ func (x *TidbStorageOptions) SetTableName(tableName string) *TidbStorageOptions 
 	return x
 }
 
-func (x *TidbStorageOptions) toMysqlStorageOptions() *mysql_storage.MysqlStorageOptions {
-	return mysql_storage.NewMysqlStorageOptions().SetConnectionManager(x.ConnectionManager).SetTableName(x.TableName)
-}
-
 func (x *TidbStorageOptions) Check() error {
-
 	if x.TableName == "" {
 		x.TableName = storage.DefaultStorageTableName
 	}
-
 	if x.ConnectionManager == nil {
 		return fmt.Errorf("ConnectionManager can not nil")
 	}
-
 	return nil
+}
+
+func (x *TidbStorageOptions) toMysqlStorageOptions() *mysql_storage.MysqlStorageOptions {
+	opts := mysql_storage.NewMysqlStorageOptions().
+		SetTableName(x.TableName).
+		SetConnectionManager(x.ConnectionManager)
+	return opts
 }
