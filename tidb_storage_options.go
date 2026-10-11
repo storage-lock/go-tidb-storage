@@ -46,7 +46,7 @@ func (x *TidbStorageOptions) Check() error {
 }
 
 func (x *TidbStorageOptions) toMysqlStorageOptions() *mysql_storage.MysqlStorageOptions {
-	opts := mysql_storage.NewMysqlStorageOptions().
+	opts := mysql_storage.NewMySQLStorageOptions().
 		SetTableName(x.TableName).
 		SetConnectionManager(x.ConnectionManager)
 	return opts

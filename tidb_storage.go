@@ -40,6 +40,9 @@ func (x *TidbStorage) GetName() string {
 }
 
 func (x *TidbStorage) Capabilities() []storage.StorageCapability {
+	if x.MysqlStorage == nil {
+		return []storage.StorageCapability{storage.CapabilityCAS, storage.CapabilityReliableTime, storage.CapabilityWatch}
+	}
 	return x.MysqlStorage.Capabilities()
 }
 
